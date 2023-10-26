@@ -100,7 +100,7 @@ const indexFood = [
 ];
 
 const result = () => {
-  const query = "hambur";
+  const query = "hamburger soda pie pizza";
   const testData = query.length > 0 ? query.split(" ") : [];
   let results = [];
   for (const word of testData) {
@@ -114,13 +114,14 @@ const result = () => {
           };
         })
         .find((index) => index.word.includes(word)) || [];
-    console.log("WORD =>", word, "-", matches);
     results.push(matches);
   }
+  //se obtiene en que frases se encuentran cada palabra
   const data = results
     .reduce((prev, curr) => prev.concat(curr.dictionarysExistIn), [])
     .map((item) => item.id);
 
+  //array plano con la metadata de cada palabra
   const ocurrencysWeigth = results.map((wordIndex) => {
     return wordIndex.dictionarysExistIn.map((phrasseIndex) => ({
       phrasseId: phrasseIndex.id,
@@ -129,6 +130,7 @@ const result = () => {
     }));
   });
 
+  //
   const plainOcurrencysWeigth = ocurrencysWeigth.reduce(
     (prev, curr) => prev.concat(curr),
     []
@@ -136,6 +138,7 @@ const result = () => {
 
   const auxSet = new Set(data);
   const uniqueData = Array.from(auxSet);
+  delete auxSet;
 
   const phrassesTotalWeigth = uniqueData
     .map((wordId) => {
@@ -151,6 +154,17 @@ const result = () => {
     })
     .sort((phrasseA, phrasseB) => phrasseB.totalWeight - phrasseA.totalWeight);
 
-  console.log(phrassesTotalWeigth);
+  const response = phrassesTotalWeigth.map((metadataPhrase) => {
+    const phrasse = dictionarys.find(
+      (dictionaryItem) => dictionaryItem.id === metadataPhrase.phrasseId
+    );
+
+    return {
+      ...metadataPhrase,
+      word: phrasse.words,
+    };
+  });
+
+  console.log(response);
 };
 result();
