@@ -100,7 +100,8 @@ const indexFood = [
 ];
 
 const result = () => {
-  const testData = "hamburger soda pie".split(" ");
+  const query = "hambur";
+  const testData = query.length > 0 ? query.split(" ") : [];
   let results = [];
   for (const word of testData) {
     const matches =
@@ -113,14 +114,43 @@ const result = () => {
           };
         })
         .find((index) => index.word.includes(word)) || [];
+    console.log("WORD =>", word, "-", matches);
     results.push(matches);
   }
-
   const data = results
     .reduce((prev, curr) => prev.concat(curr.dictionarysExistIn), [])
     .map((item) => item.id);
 
-  const uniqueData = Array.from(new Set(data));
-  console.log(data, uniqueData);
+  const ocurrencysWeigth = results.map((wordIndex) => {
+    return wordIndex.dictionarysExistIn.map((phrasseIndex) => ({
+      phrasseId: phrasseIndex.id,
+      wordWeigth: wordIndex.weigth,
+      wordIndexId: wordIndex.id,
+    }));
+  });
+
+  const plainOcurrencysWeigth = ocurrencysWeigth.reduce(
+    (prev, curr) => prev.concat(curr),
+    []
+  );
+
+  const auxSet = new Set(data);
+  const uniqueData = Array.from(auxSet);
+
+  const phrassesTotalWeigth = uniqueData
+    .map((wordId) => {
+      return plainOcurrencysWeigth
+        .filter((ocurrency) => ocurrency.phrasseId === wordId)
+        .reduce(
+          (prev, curr) => ({
+            phrasseId: curr.phrasseId,
+            totalWeight: curr.wordWeigth + prev.totalWeight,
+          }),
+          { totalWeight: 0 }
+        );
+    })
+    .sort((phrasseA, phrasseB) => phrasseB.totalWeight - phrasseA.totalWeight);
+
+  console.log(phrassesTotalWeigth);
 };
 result();
